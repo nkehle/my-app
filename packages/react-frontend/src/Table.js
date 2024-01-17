@@ -27,7 +27,7 @@ function TableBody(props) {
    );
 }
 
-function Table() {
+function Table(props) {
     return (
       <table>
         <TableHeader />
