@@ -23,17 +23,16 @@ function MyApp() {
     return promise;
   }
   
-  function removeOneCharacter(id) {
-    const updated = characters.filter((character, i) => character.id !== id);
-    setCharacters(updated);
-  
-    return fetch(`http://localhost:8000/users/${id}`, {
+  function removeOneCharacter(index, id) {
+    return fetch(`http://localhost:8000/users/${index}`, {
       method: 'DELETE',
     })
       .then((res) => {
-        if (res.status === 204) {
-          // Delete successful, no need to update state again
-          return res;
+        if (res.status === 204) { // succsessful
+          const updated = characters.filter((character, i) => {
+            return i !== index;
+          });
+          setCharacters(updated);
         } else if (res.status === 404) {
           throw new Error('User not found.');
         } else {
