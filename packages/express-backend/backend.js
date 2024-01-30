@@ -1,5 +1,5 @@
 // backend.js
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
@@ -29,8 +29,8 @@ const addUser = (user) => {
   app.post("/users", (req, res) => {
     const userToAdd = req.body;
     const id = `${Math.floor(100000 + Math.random() * 900000)}`;
-    addUser({id: id ,...userToAdd});
-    res.status(201).send();
+    const addedUser = addUser({id: id ,...userToAdd});
+    res.status(201).json(addedUser);
   });
   
   app.get("/users", (req, res) => {
