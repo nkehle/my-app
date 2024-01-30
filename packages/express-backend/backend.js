@@ -28,8 +28,9 @@ const addUser = (user) => {
   
   app.post("/users", (req, res) => {
     const userToAdd = req.body;
-    addUser(userToAdd);
-    res.send();
+    const id = `${Math.floor(100000 + Math.random() * 900000)}`;
+    addUser({id: id ,...userToAdd});
+    res.status(201).send();
   });
   
   app.get("/users", (req, res) => {
