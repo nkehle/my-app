@@ -1,6 +1,7 @@
 // backend.js
 import express, { json } from "express";
 import cors from "cors";
+import userServices from "./user-services.js";
 
 const app = express();
 const port = 8000;
@@ -12,103 +13,76 @@ app.get("/", (req, res) => {
   res.send("Hey there feller!");
 });
 
-
-const findUserByName = (name) => {
-    return users["users_list"].filter(
-      (user) => user["name"] === name
-    );
-  };
-
-const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
-
-const addUser = (user) => {
-    users["users_list"].push(user);
-    return user;
-  };
-
-const deleteUser = (indexToDelete) => {
-  if (indexToDelete !== -1) {
-    const deletedUser = users["users_list"].splice(indexToDelete, 1)[0];
-    return { success: true, deletedUser };
-  }
-
-  console.log("User not found");
-  return { success: false };
-};
-  
-  
-app.post("/users", (req, res) => {
-  const userToAdd = req.body;
-  const id = `${Math.floor(100000 + Math.random() * 900000)}`;
-  const addedUser = addUser({id: id ,...userToAdd});
-  res.status(201).json(addedUser);
-});
-  
-app.get("/users", (req, res) => {
-  const name = req.query.name;
-  if (name != undefined) {
-    let result = findUserByName(name);
-    result = { users_list: result };
-    res.send(result);
-  } else {
-    res.send(users);
+app.get("/users", async (req, res) => {
+  const name = req.query["name"];
+  const job = req.query["job"];
+  try {
+    const result = await userServices.getUsers(name, job);
+    res.send({ users_list: result });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("An error ocurred in the server.");
   }
 });
 
-app.get("/users/:id", (req, res) => {
-  const id = req.params["id"]; //or req.params.id
-  let result = findUserById(id);
-  if (result === undefined) {
+app.get("/users/:id", async (req, res) => {
+  const id = req.params["id"];
+  const result = await userServices.findUserById(id);
+  if (result === undefined || result === null)
     res.status(404).send("Resource not found.");
-  } else {
-    res.send(result);
+  else {
+    res.send({ users_list: result });
   }
 });
 
-app.delete("/users/:id", (req, res) => {
-  const id = req.params.id;
-  const deleteResult = deleteUser(id);
-
-  if (deleteResult.success) {
-    res.status(204).send();
-  } else {
-    res.status(404).send("User not found.");
-  }
+app.post("/users", async (req, res) => {
+  const user = req.body;
+  const savedUser = await userServices.addUser(user);
+  if (savedUser) res.status(201).send(savedUser);
+  else res.status(500).end();
 });
 
 app.listen(port, () => {
-  console.log(
-    `Example app listening at http://localhost:${port}`
-  );
+  console.log(`Example app listening at http://localhost:${port}`);
 });
 
-const users = {
-  users_list: [
-    {
-      id: "xyz789",
-      name: "Charlie",
-      job: "Janitor"
-    },
-    {
-      id: "abc123",
-      name: "Mac",
-      job: "Bouncer"
-    },
-    {
-      id: "ppp222",
-      name: "Mac",
-      job: "Professor"
-    },
-    {
-      id: "yat999",
-      name: "Dee",
-      job: "Aspring actress"
-    },
-    {
-      id: "zap555",
-      name: "Dennis",
-      job: "Bartender"
-    }
-  ]
-};
+// const users = {
+//   users_list: [
+//     {
+//       id: "xyz789",
+//       name: "Charlie",
+//       job: "Janitor"
+//     },
+//     {
+//       id: "abc123",
+//       name: "Mac",
+//       job: "Bouncer"
+//     },
+//     {
+//       id: "ppp222",
+//       name: "Mac",
+//       job: "Professor"
+//     },
+//     {
+//       id: "yat999",
+//       name: "Dee",
+//       job: "Aspring actress"
+//     },
+//     {
+//       id: "zap555",
+//       name: "Dennis",
+//       job: "Bartender"
+//     }
+//   ]
+// };
+
+// app.delete("/users/:id", (req, res) => {
+//   const id = req.params.id; 
+//   const deleteResult = await userServices.deleteUser(id);
+
+//   if (deleteResult.success) {
+//     res.status(204).send();
+//   } else {
+//     res.status(404).send("User not found.");
+//   }
+// });
