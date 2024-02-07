@@ -35,6 +35,7 @@ app.get("/users/:id", async (req, res) => {
   }
 });
 
+
 app.post("/users", async (req, res) => {
   const user = req.body;
   const savedUser = await userServices.addUser(user);
